@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
-     Commit Version: 1.6.0-1-g15f4949  Build Version: 1.6.7594.29634
-     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! 
+  Originally created by Stephen Brawner (brawner@gmail.com)
+  For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 
   <xacro:macro name="venus" params="parent prefix *origin">
 
   <!-- Constants for robot dimensions -->
-  <xacro:property name="pi_offset" value="0.001" />
+  <!-- <xacro:property name="pi_offset" value="0.001" /> -->
 
   <joint name="${prefix}base_joint" type="fixed">
     <xacro:insert_block name="origin" />
