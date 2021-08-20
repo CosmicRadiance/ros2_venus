@@ -24,7 +24,7 @@ https://github.com/ros-controls/ros2_control_demos/blob/master/ros2_control_demo
 
   <xacro:venus parent="world" prefix="$(arg prefix)">
     <origin xyz="0 0 0" rpy="0 0 0" />
-  </xacro:rrbot>
+  </xacro:venus>
 
   <!-- <xacro:rrbot_ros2_control name="RRBot" prefix="$(arg prefix)" /> -->
 
