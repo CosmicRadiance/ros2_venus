@@ -8,13 +8,13 @@ https://github.com/ros-controls/ros2_control_demos/blob/master/ros2_control_demo
   <xacro:arg name="prefix" default="" />
 
   <!-- Import Venus macro -->
-  <xacro:include filename="$(find rrbot_description)/urdf/rrbot_description.urdf.xacro" />
+  <xacro:include filename="$(find venus_description)/urdf/venus_description.urdf.xacro" />
 
   <!-- Import Rviz colors -->
   <!-- <xacro:include filename="$(find rrbot_description)/gazebo/rrbot.materials.xacro" /> -->
 
   <!-- Import Venus ros2_control description -->
-  <xacro:include filename="$(find rrbot_description)/ros2_control/rrbot.ros2_control.xacro" />
+  <!-- <xacro:include filename="$(find rrbot_description)/ros2_control/rrbot.ros2_control.xacro" /> -->
 
   <!-- Used for fixing robot -->
   <link name="world"/>
