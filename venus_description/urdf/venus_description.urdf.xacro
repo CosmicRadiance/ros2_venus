@@ -22,6 +22,7 @@
       <geometry>
         <mesh filename="package://venus_description/meshes/base_link.STL" />
       </geometry>
+      <material name="grey"/>
     </visual>
 
     <collision>
@@ -58,6 +59,7 @@
       <geometry>
         <mesh filename="package://venus_description/meshes/link1.STL" />
       </geometry>
+      <material name="grey"/>
     </visual>
 
     <collision>
@@ -94,6 +96,7 @@
         <mesh
           filename="package://venus_description/meshes/link2.STL" />
       </geometry>
+      <material name="grey"/>
     </visual>
 
     <collision>
@@ -131,6 +134,7 @@
         <mesh
           filename="package://venus_description/meshes/link3.STL" />
       </geometry>
+      <material name="grey"/>
     </visual>
 
     <collision>
@@ -167,6 +171,7 @@
         <mesh
           filename="package://venus_description/meshes/link4.STL" />
       </geometry>
+      <material name="grey"/>
     </visual>
 
     <collision>
@@ -203,6 +208,7 @@
         <mesh
           filename="package://venus_description/meshes/link5.STL" />
       </geometry>
+      <material name="grey"/>
     </visual>
 
     <collision>
