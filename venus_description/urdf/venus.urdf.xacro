@@ -14,7 +14,7 @@ https://github.com/ros-controls/ros2_control_demos/blob/master/ros2_control_demo
   <xacro:include filename="$(find venus_description)/gazebo/venus.materials.xacro" />
 
   <!-- Import Venus ros2_control description -->
-  <!-- <xacro:include filename="$(find rrbot_description)/ros2_control/rrbot.ros2_control.xacro" /> -->
+  <xacro:include filename="$(find venus_description)/ros2_control/venus.ros2_control.xacro" />
 
   <!-- Used for fixing robot -->
   <link name="world"/>
@@ -26,6 +26,6 @@ https://github.com/ros-controls/ros2_control_demos/blob/master/ros2_control_demo
     <origin xyz="0 0 0" rpy="0 0 0" />
   </xacro:venus>
 
-  <!-- <xacro:rrbot_ros2_control name="RRBot" prefix="$(arg prefix)" /> -->
+  <xacro:venus_ros2_control name="Venus" prefix="$(arg prefix)" />
 
 </robot>
