@@ -1,0 +1,9 @@
+<library path="venus_hardware">
+  <class name="venus_hardware/VenusSystemPositionOnlyHardware"
+         type="venus_hardware::VenusSystemPositionOnlyHardware"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      The ROS2 Control for Venus.
+    </description>
+  </class>
+</library>
