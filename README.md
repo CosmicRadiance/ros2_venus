@@ -5,7 +5,28 @@
 - [ ] Transfer Moveit configuration to ROS 2
 - [ ] Realize control the movement via actutaor SDK
 
-## ROS Command for test
+## Test in Rviz 2
+1. To start the manipulator, open a terminal, source the ROS2-workspace and execute its launch file with:
+```
+ros2 launch ros2_control_demo_bringup rrbot.launch.py
+```
+
+2. Check if the hardware interface loaded properly, by opening another terminal and executing:
+```
+ros2 control list_hardware_interfaces
+```
+
+3. Check if controllers are running:
+```
+ros2 control list_controllers
+```
+
+4. Start a demo node which sends goals every 5 seconds in a loop:
+```
+ros2 launch venus_bringup test_forward_position_controller.launch.py
+```
+
+## ROS Command for actuator test
 ### Activate all the actuators
     rostopic pub -1 /INNFOS/enableActuator actuatorcontroller_ros/ActuatorArray "JointIDs:
     - 0"
