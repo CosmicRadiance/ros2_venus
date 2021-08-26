@@ -1,34 +1,49 @@
 cmake_minimum_required(VERSION 3.5)
 project(venus_description)
 
-# # Default to C99
-# if(NOT CMAKE_C_STANDARD)
-#   set(CMAKE_C_STANDARD 99)
-# endif()
+if( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
+	set(BUILD_PLATFORM
+		linux_x86_64)
+else()
+	set(BUILD_PLATFORM
+		windows_x64)
+endif()
 
-# # Default to C++14
-# if(NOT CMAKE_CXX_STANDARD)
-#   set(CMAKE_CXX_STANDARD 14)
-# endif()
+# Default to C99
+if(NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99)
+endif()
 
-# if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-#   add_compile_options(-Wall -Wextra -Wpedantic)
-# endif()
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# find_package(rclcpp REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
 
-# if(BUILD_TESTING)
-#   find_package(ament_lint_auto REQUIRED)
-#   # the following line skips the linter which checks for copyrights
-#   # uncomment the line when a copyright and license is not present in all source files
-#   #set(ament_cmake_copyright_FOUND TRUE)
-#   # the following line skips cpplint (only works in a git repo)
-#   # uncomment the line when this package is not in a git repo
-#   #set(ament_cmake_cpplint_FOUND TRUE)
-#   ament_lint_auto_find_test_dependencies()
-# endif()
+include_directories(
+	${CMAKE_CURRENT_SOURCE_DIR}/ActuatorController_SDK/sdk/include
+)
+
+add_executable(venus_control_node src/venus_control.cpp)
+ament_target_dependencies(venus_control_node rclcpp std_msgs)
+
+# include_directories(actuator_sdk PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ActuatorController_SDK/sdk/include)
+# target_link_libraries(venus_control_node
+#    ${catkin_LIBRARIES}
+#    ${CMAKE_CURRENT_SOURCE_DIR}/ActuatorController_SDK/sdk/lib/${BUILD_PLATFORM}/libActuatorController.so
+# )
+
+install(TARGETS
+venus_control_node
+  DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files.
 install(

@@ -4,10 +4,13 @@
   <name>venus_description</name>
   <version>1.0.0</version>
   <description>Description files on Venus manipulator</description>
-  <maintainer email="ray.yuleiqiu@gmail.com">root</maintainer>
+  <maintainer email="ray.yuleiqiu@gmail.com">Yulei Qiu</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
 
   <exec_depend>joint_state_publisher_gui</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
