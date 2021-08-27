@@ -27,13 +27,14 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/ActuatorController_SDK/sdk/include
 )
 
 add_executable(venus_control_node src/venus_control.cpp)
-ament_target_dependencies(venus_control_node rclcpp std_msgs)
+ament_target_dependencies(venus_control_node rclcpp sensor_msgs)
 
 # include_directories(actuator_sdk PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ActuatorController_SDK/sdk/include)
 # target_link_libraries(venus_control_node
@@ -42,12 +43,12 @@ ament_target_dependencies(venus_control_node rclcpp std_msgs)
 # )
 
 install(TARGETS
-venus_control_node
+  venus_control_node
   DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files.
-install(
-  DIRECTORY config gazebo launch meshes ros2_control urdf
+install(DIRECTORY
+  config gazebo launch meshes ros2_control urdf
   DESTINATION share/${PROJECT_NAME}/
 )
 
