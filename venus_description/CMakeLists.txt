@@ -26,7 +26,6 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
 include_directories(
@@ -34,16 +33,16 @@ include_directories(
 )
 
 add_executable(venus_control_node src/venus_control.cpp)
-ament_target_dependencies(venus_control_node rclcpp sensor_msgs)
 
-# include_directories(actuator_sdk PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ActuatorController_SDK/sdk/include)
-# target_link_libraries(venus_control_node
-#    ${catkin_LIBRARIES}
-#    ${CMAKE_CURRENT_SOURCE_DIR}/ActuatorController_SDK/sdk/lib/${BUILD_PLATFORM}/libActuatorController.so
-# )
+ament_target_dependencies(venus_control_node
+  rclcpp
+  sensor_msgs)
 
-install(TARGETS
-  venus_control_node
+target_link_libraries(venus_control_node
+  ${CMAKE_CURRENT_SOURCE_DIR}/ActuatorController_SDK/sdk/lib/${BUILD_PLATFORM}/libActuatorController.so
+)
+
+install(TARGETS venus_control_node
   DESTINATION lib/${PROJECT_NAME})
 
 # Install launch files.
