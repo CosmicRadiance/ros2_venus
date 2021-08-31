@@ -28,6 +28,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
+# include local directories and dependencies that are not ament packages
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/ActuatorController_SDK/sdk/include
 )
@@ -38,6 +39,7 @@ ament_target_dependencies(venus_control_node
   rclcpp
   sensor_msgs)
 
+# link with packages that are not ament packages
 target_link_libraries(venus_control_node
   ${CMAKE_CURRENT_SOURCE_DIR}/ActuatorController_SDK/sdk/lib/${BUILD_PLATFORM}/libActuatorController.so
 )
