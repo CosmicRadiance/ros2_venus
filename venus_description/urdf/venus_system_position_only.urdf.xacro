@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!-- Venus Manipulator -->
+<!--
+Copied and modified from ros2_control_demo example -
+https://github.com/ros-controls/ros2_control_demos/blob/master/ros2_control_demo_description/rrbot_description/urdf/rrbot_system_position_only.urdf.xacro
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="venus_manipulator">
+  <xacro:arg name="use_sim" default="false" />
+
+  <!-- Enable setting arguments from the launch file -->
+  <xacro:arg name="use_fake_hardware" default="false" />
+  <xacro:arg name="fake_sensor_commands" default="false" />
+  <xacro:arg name="prefix" default="" />
+  <xacro:arg name="slowdown" default="2.0" />
+
+  <!-- Import Venus macro -->
+  <xacro:include filename="$(find venus_description)/urdf/venus_description.urdf.xacro" />
+
+  <!-- Import all Gazebo-customization elements, including Gazebo colors -->
+  <!-- <xacro:include filename="$(find rrbot_description)/gazebo/rrbot.gazebo.xacro" /> -->
+
+  <!-- Import Rviz colors -->
+  <xacro:include filename="$(find venus_description)/gazebo/venus.materials.xacro" />
+
+  <!-- Import Venus ros2_control description -->
+  <xacro:include filename="$(find venus_description)/ros2_control/venus_system_position_only.ros2_control.xacro" />
+
+  <!-- Used for fixing robot -->
+  <link name="world"/>
+  <gazebo reference="world">
+    <static>true</static>
+  </gazebo>
+
+  <xacro:venus parent="world" prefix="$(arg prefix)">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </xacro:venus>
+
+  <!-- <xacro:rrbot_gazebo prefix="$(arg prefix)" /> -->
+
+  <xacro:venus_system_position_only
+    name="VenusSystemPositionOnly" prefix="$(arg prefix)"
+    use_fake_hardware="$(arg use_fake_hardware)"
+    fake_sensor_commands="$(arg fake_sensor_commands)"
+    slowdown="$(arg slowdown)" />
+
+</robot>
