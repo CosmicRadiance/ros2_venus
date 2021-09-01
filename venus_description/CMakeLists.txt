@@ -39,7 +39,7 @@ ament_target_dependencies(venus_control_node
   rclcpp
   sensor_msgs)
 
-# link with packages that are not ament packages
+# link libraries that are not ament packages
 target_link_libraries(venus_control_node
   ${CMAKE_CURRENT_SOURCE_DIR}/ActuatorController_SDK/sdk/lib/${BUILD_PLATFORM}/libActuatorController.so
 )

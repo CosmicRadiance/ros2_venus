@@ -5,7 +5,7 @@
   <version>1.0.0</version>
   <description>Demo nodes for showing and testing functionalities of the ros2_control framework.</description>
 
-  <maintainer email="vsper2016@gmail.com">Yulei Qiu</maintainer>
+  <maintainer email="ray.yuleiqiu@gmail.com">Yulei Qiu</maintainer>
 
   <license>Apache-2.0</license>
 

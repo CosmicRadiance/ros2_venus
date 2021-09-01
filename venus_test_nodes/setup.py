@@ -31,9 +31,9 @@ setup(
     install_requires=["setuptools"],
     zip_safe=True,
     author="Yulei Qiu",
-    author_email="vsper2016@gmail.com",
+    author_email="ray.yuleiqiu@gmail.com",
     maintainer="Yulei Qiu",
-    maintainer_email="vsper2016@gmail.com",
+    maintainer_email="ray.yuleiqiu@gmail.com",
     keywords=["ROS"],
     classifiers=[
         "Intended Audience :: Developers",
