@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "venus_hardware/venus_system_position_only.hpp"
-
+#include <iostream>
 #include <chrono>
 #include <cmath>
 #include <limits>
@@ -22,6 +21,17 @@
 
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
+
+#include "venus_hardware/venus_system_position_only.hpp"
+
+#define AXIS_JOINT_INDEX_MAX  5
+#define DEG_TO_RAD(x) ((x)*M_PI / 180.0)
+#define RAD_TO_DEG(x) ((x)*180.0 / M_PI)
+
+#define STEERING_GEAR_RATIO 36
+
+#define RAD_TO_POS(x) ((x / (2 * M_PI)) * STEERING_GEAR_RATIO)
+#define POS_TO_RAD(x) ((x * (2 * M_PI)) / STEERING_GEAR_RATIO)
 
 namespace venus_hardware
 {
@@ -35,7 +45,7 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::configure(
 
   hw_start_sec_ = stod(info_.hardware_parameters["example_param_hw_start_duration_sec"]);
   hw_stop_sec_ = stod(info_.hardware_parameters["example_param_hw_stop_duration_sec"]);
-  hw_slowdown_ = stod(info_.hardware_parameters["example_param_hw_slowdown"]);
+  // hw_slowdown_ = stod(info_.hardware_parameters["example_param_hw_slowdown"]);
   hw_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
   hw_commands_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
 
@@ -80,6 +90,9 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::configure(
   }
 
   status_ = hardware_interface::status::CONFIGURED;
+  RCLCPP_INFO(
+    rclcpp::get_logger("VenusSystemPositionOnlyHardware"), 
+    "VenusSystemPositionOnlyHardware Ready.");
   return hardware_interface::return_type::OK;
 }
 
@@ -121,6 +134,44 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::start()
       hw_start_sec_ - i);
   }
 
+  pController_ = ActuatorController::initController();
+  Actuator::ErrorsDefine ec;
+  uIDArray_ = pController_->lookupActuators(ec);
+  if (uIDArray_.size() > 0)
+  {
+    RCLCPP_INFO(
+      rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+      "The connected actuators have been found!");
+    if (pController_->enableActuatorInBatch(uIDArray_))
+    {
+      RCLCPP_INFO(
+        rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+        "All actuators have been enabled successfully!" );
+    }
+    else
+    {
+      RCLCPP_ERROR(
+        rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+        "Failed to enable all actuators");
+    }
+    for(size_t k = 0; k < uIDArray_.size(); k++)
+    {
+      ActuatorController::UnifiedID actuator = uIDArray_.at(k);
+      pController_->activateActuatorMode(actuator.actuatorID, Actuator::Mode_Profile_Pos);
+      RCLCPP_INFO(
+        rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+        "Set the position of actuator %d to zero, be careful.", actuator.actuatorID);
+      pController_->setPosition(actuator.actuatorID, 0);
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+  }
+  else
+  {
+    RCLCPP_ERROR(
+      rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+      "Connected error code: %x", ec);
+  }
+
   // set some default values when starting the first time
   for (uint i = 0; i < hw_states_.size(); i++)
   {
@@ -155,6 +206,10 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::stop()
       hw_stop_sec_ - i);
   }
 
+  // Disable all connected actuators
+  pController_->disableAllActuators();
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+
   status_ = hardware_interface::status::STOPPED;
 
   RCLCPP_INFO(
@@ -169,8 +224,10 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::read()
 
   for (uint i = 0; i < hw_states_.size(); i++)
   {
-    // Simulate Venus's movement
-    hw_states_[i] = hw_states_[i] + (hw_commands_[i] - hw_states_[i]) / hw_slowdown_;
+    ActuatorController::UnifiedID actuator = uIDArray_.at(i);
+    if (i > 1) hw_states_[i] = pController_->getPosition(uint8_t(actuator.actuatorID+1), true);
+    else hw_states_[i] = pController_->getPosition(actuator.actuatorID, true);
+    hw_states_[i] = POS_TO_RAD(hw_states_[i]);
     RCLCPP_INFO(
       rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "Got state %.5f for joint %d!",
       hw_states_[i], i);
@@ -186,7 +243,14 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::write()
 
   for (uint i = 0; i < hw_commands_.size(); i++)
   {
-    // Simulate sending commands to the hardware
+    ActuatorController::UnifiedID actuator = uIDArray_.at(i);
+    if (i > 1) pController_->setPosition(uint8_t(actuator.actuatorID+1), RAD_TO_POS(hw_commands_[i]));
+    else if (i == 1)
+    {
+      pController_->setPosition(actuator.actuatorID, RAD_TO_POS(hw_commands_[i]));
+      pController_->setPosition(uint8_t(actuator.actuatorID+1), -1*RAD_TO_POS(hw_commands_[i]));
+    }
+    else pController_->setPosition(actuator.actuatorID, RAD_TO_POS(hw_commands_[i]));
     RCLCPP_INFO(
       rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "Got command %.5f for joint %d!",
       hw_commands_[i], i);

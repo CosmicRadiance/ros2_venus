@@ -1,13 +1,26 @@
 cmake_minimum_required(VERSION 3.5)
 project(venus_hardware)
 
+if( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64")
+	set(BUILD_PLATFORM
+		linux_x86_64)
+else()
+	set(BUILD_PLATFORM
+		windows_x64)
+endif()
+
+# Default to C99
+if(NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99)
+endif()
+
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 14)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra)
+  add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
 # find dependencies
@@ -16,7 +29,12 @@ find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 
-## COMPILE
+# include local directories and dependencies that are not ament packages
+include_directories(
+	${CMAKE_CURRENT_SOURCE_DIR}/ActuatorController_SDK/sdk/include
+)
+
+# COMPILE
 add_library(
   ${PROJECT_NAME}
   SHARED
@@ -32,6 +50,11 @@ ament_target_dependencies(
   hardware_interface
   pluginlib
   rclcpp
+)
+
+# link libraries that are not ament packages
+target_link_libraries(${PROJECT_NAME}
+  ${CMAKE_CURRENT_SOURCE_DIR}/ActuatorController_SDK/sdk/lib/${BUILD_PLATFORM}/libActuatorController.so
 )
 
 pluginlib_export_plugin_description_file(hardware_interface venus_hardware.xml)
@@ -62,4 +85,5 @@ ament_export_dependencies(
   pluginlib
   rclcpp
 )
+
 ament_package()

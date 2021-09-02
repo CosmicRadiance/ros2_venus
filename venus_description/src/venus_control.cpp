@@ -58,7 +58,6 @@ void jointStatesCallback(const sensor_msgs::msg::JointState::SharedPtr msg)
         s_jointStatesList.pop();
         RCLCPP_WARN(rclcpp::get_logger("callback"), "jointStatesCallback, pop");
     }
-    // RCLCPP_INFO(rclcpp::get_logger("callback"), "I got a message!");
 }
 
 int main(int argc, char *argv[])
@@ -90,14 +89,14 @@ int main(int argc, char *argv[])
             ActuatorController::UnifiedID actuator = uIDArray.at(k);
             // Enable actuator
             RCLCPP_INFO(node->get_logger(), "actuator ID %d, ipAddr %s",
-            actuator.actuatorID,actuator.ipAddress.c_str());
-            pController->enableActuator(actuator.actuatorID,actuator.ipAddress);
-            // activate profile position mode
+            actuator.actuatorID, actuator.ipAddress.c_str());
+            pController->enableActuator(actuator.actuatorID, actuator.ipAddress);
+            // Activate profile position mode
             pController->activateActuatorMode(actuator.actuatorID,Actuator::Mode_Profile_Pos);
 
-            std::cout << "set position to zero positions " << std::endl;
+            std::cout << "Set the actuator to zero position" << std::endl;
             pController->setPosition(actuator.actuatorID, 0);
-            std::this_thread::sleep_for(std::chrono::seconds(1));
+            std::this_thread::sleep_for(std::chrono::seconds(5));
         }
     }
     else

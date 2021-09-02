@@ -26,7 +26,9 @@
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
 #include "hardware_interface/types/hardware_interface_status_values.hpp"
 #include "rclcpp/macros.hpp"
+
 #include "venus_hardware/visibility_control.h"
+#include "actuatorcontroller.h"
 
 namespace venus_hardware
 {
@@ -34,7 +36,7 @@ class VenusSystemPositionOnlyHardware
 : public hardware_interface::BaseInterface<hardware_interface::SystemInterface>
 {
 public:
-  RCLCPP_SHARED_PTR_DEFINITIONS(VenusSystemPositionOnlyHardware);
+  RCLCPP_SHARED_PTR_DEFINITIONS(VenusSystemPositionOnlyHardware)
 
   VENUS_HARDWARE_PUBLIC
   hardware_interface::return_type configure(const hardware_interface::HardwareInfo & info) override;
@@ -58,14 +60,17 @@ public:
   hardware_interface::return_type write() override;
 
 private:
-  // Parameters for the Venus simulation
+  // // Parameters for the Venus simulation
   double hw_start_sec_;
   double hw_stop_sec_;
-  double hw_slowdown_;
+  // double hw_slowdown_;
 
   // Store the command for the simulated robot
   std::vector<double> hw_commands_;
   std::vector<double> hw_states_;
+
+  ActuatorController* pController_;
+  std::vector<ActuatorController::UnifiedID> uIDArray_;
 };
 
 }  // namespace venus_hardware
