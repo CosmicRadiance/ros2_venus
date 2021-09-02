@@ -1,0 +1,2 @@
+# Hardware Interface
+Hardware interfaces are defined by the headers and source files. For position only system, there are 7 functions in total to be defined: *configure*, *export_state_interfaces*, *export_command_interfaces*, *start*, *stop*, *read*, *write*.
