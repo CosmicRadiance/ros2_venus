@@ -146,13 +146,13 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::start()
     {
       RCLCPP_INFO(
         rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
-        "All actuators have been enabled successfully!" );
+        "All actuators have been enabled successfully!");
     }
     else
     {
       RCLCPP_ERROR(
         rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
-        "Failed to enable all actuators");
+        "Failed to enable actuators");
     }
     for(size_t k = 0; k < uIDArray_.size(); k++)
     {
@@ -170,6 +170,7 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::start()
     RCLCPP_ERROR(
       rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
       "Connected error code: %x", ec);
+      return hardware_interface::return_type::ERROR;
   }
 
   // set some default values when starting the first time

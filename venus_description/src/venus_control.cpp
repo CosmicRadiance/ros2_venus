@@ -84,24 +84,27 @@ int main(int argc, char *argv[])
     // If the size of the uIDArray is greater than zero, the connected actuators have been found
     if (uIDArray.size() > 0)
     {
+        RCLCPP_INFO(node->get_logger(), "Found %d actuators!", uIDArray.size());
+        if (pController->enableActuatorInBatch(uIDArray))
+            RCLCPP_INFO(node->get_logger(), "All actuators have been enabled successfully!");
+        else
+        {
+            RCLCPP_ERROR(node->get_logger(), "Failed to enable actuators...");
+            return -1;
+        }
         for(size_t k = 0; k < uIDArray.size(); k++)
         {
             ActuatorController::UnifiedID actuator = uIDArray.at(k);
-            // Enable actuator
-            RCLCPP_INFO(node->get_logger(), "actuator ID %d, ipAddr %s",
-            actuator.actuatorID, actuator.ipAddress.c_str());
-            pController->enableActuator(actuator.actuatorID, actuator.ipAddress);
-            // Activate profile position mode
-            pController->activateActuatorMode(actuator.actuatorID,Actuator::Mode_Profile_Pos);
-
-            std::cout << "Set the actuator to zero position" << std::endl;
+            pController->activateActuatorMode(actuator.actuatorID, Actuator::Mode_Profile_Pos);
+            RCLCPP_INFO(node->get_logger(),
+            "Set the position of actuator %d to zero, be careful.", actuator.actuatorID);
             pController->setPosition(actuator.actuatorID, 0);
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+            std::this_thread::sleep_for(std::chrono::seconds(3));
         }
     }
     else
     {
-        std::cout << "Connected error code:" << hex << ec << std::endl;
+        RCLCPP_ERROR(node->get_logger(), "Connected error code: %x", ec);
         return -1;
     }
 
@@ -131,8 +134,8 @@ int main(int argc, char *argv[])
                 }
                 else if (i == 2)
                 {
-                    RCLCPP_INFO(node->get_logger(),
-                    "jointstate_%d, %s, %f", i, js_data.name[i-1].c_str(), js_data.position[i-1]);
+                    // RCLCPP_INFO(node->get_logger(),
+                    // "jointstate_%d, %s, %f", i, js_data.name[i-1].c_str(), js_data.position[i-1]);
                     pController->setPosition(actuator.actuatorID, -1*RAD_TO_POS(js_data.position[i-1]));
                 }
                 else
