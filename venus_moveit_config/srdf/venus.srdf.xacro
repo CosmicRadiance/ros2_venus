@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="venus">
+
+  <!-- robot name parameter -->
+  <xacro:arg name="name" default="venus"/>
+  <!-- parameters -->
+  <xacro:arg name="prefix" default="" />
+
+  <xacro:include filename="$(find venus_moveit_config)/srdf/venus_macro.srdf.xacro"/>
+
+  <xacro:venus_srdf name="$(arg name)" prefix="$(arg prefix)"/>
+
+</robot>
