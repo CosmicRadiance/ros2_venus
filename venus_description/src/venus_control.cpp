@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
             RCLCPP_ERROR(node->get_logger(), "Failed to enable actuators...");
             return -1;
         }
+        // Loop over the actuators, change their mode to profile position and set the position to zero
         for(size_t k = 0; k < uIDArray.size(); k++)
         {
             ActuatorController::UnifiedID actuator = uIDArray.at(k);
@@ -108,7 +109,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    RCLCPP_INFO(node->get_logger(), "Initialized!");
+    RCLCPP_INFO(node->get_logger(), "All the actuators are initialized!");
     
     rclcpp::Rate loop_rate(50);
     while (rclcpp::ok())
@@ -121,9 +122,8 @@ int main(int argc, char *argv[])
             s_jointStatesList.pop();
             for(int i = 0; i < 6; i++)
             {
-                // Since we have 2 actuators at joint 2 (the index here is the same as that in Rviz 2),
-                // you have to deal with actuator No.2 and No.3,
-                // making them rotating to opposite directions
+                // Since there are 2 actuators (No.2 and No.3) at joint 2,
+                // they need to rotate to opposite direction
                 ActuatorController::UnifiedID actuator = uIDArray.at(i);
                 // Actual movement at joint 1, 3, 4 are opposite
                 if (i < 2)
