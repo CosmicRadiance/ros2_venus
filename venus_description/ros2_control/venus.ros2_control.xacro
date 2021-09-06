@@ -2,11 +2,10 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:macro name="venus_control" params="name prefix 
-  use_sim:=^|false
-  use_fake_hardware:=^|true fake_sensor_commands:=^|false">
+  use_sim:=false
+  use_fake_hardware:=true fake_sensor_commands:=false">
 
     <ros2_control name="${name}" type="system">
-
       <!-- <xacro:if value="$(arg use_sim)">
         <hardware>
           <plugin>gazebo_ros2_control/GazeboSystem</plugin>
@@ -20,9 +19,7 @@
             <param name="state_following_offset">0.0</param>
           </xacro:if>
           <xacro:unless value="${use_fake_hardware}">
-            <plugin>venus_hardware/VenusSystemPositionOnlyHardware</plugin>
-            <param name="example_param_hw_start_duration_sec">2.0</param>
-            <param name="example_param_hw_stop_duration_sec">3.0</param>
+            <plugin>venus_hardware/VenusHardwareInterface</plugin>
           </xacro:unless>
         </hardware>
       </xacro:unless>

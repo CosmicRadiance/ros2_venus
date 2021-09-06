@@ -38,7 +38,7 @@ include_directories(
 add_library(
   ${PROJECT_NAME}
   SHARED
-  src/venus_system_position_only.cpp
+  src/venus_position_hardware_interface.cpp
 )
 target_include_directories(
   ${PROJECT_NAME}

@@ -1,4 +1,4 @@
-// Copyright 2020 ros2_control Development Team
+// Copyright 2021 Lenove Research Shanghai
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,31 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef VENUS_HARDWARE__VENUS_SYSTEM_POSITION_ONLY_HPP_
-#define VENUS_HARDWARE__VENUS_SYSTEM_POSITION_ONLY_HPP_
+//----------------------------------------------------------------------
+/*!\file
+ *
+ * \author  Yulei Qiu ray.yuleiqiu@gmail.com
+ * \date    2021-09-06
+ *
+ */
+//----------------------------------------------------------------------
+#ifndef VENUS_HARDWARE__HARDWARE_INTERFACE_HPP_
+#define VENUS_HARDWARE__HARDWARE_INTERFACE_HPP_
 
+// System
 #include <memory>
 #include <string>
 #include <vector>
 
+// ros2_control hardware_interface
 #include "hardware_interface/base_interface.hpp"
 #include "hardware_interface/handle.hpp"
 #include "hardware_interface/hardware_info.hpp"
 #include "hardware_interface/system_interface.hpp"
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
 #include "hardware_interface/types/hardware_interface_status_values.hpp"
+#include "venus_hardware/visibility_control.h"
+
+// ROS
 #include "rclcpp/macros.hpp"
 
-#include "venus_hardware/visibility_control.h"
+// Actuator staff
 #include "actuatorcontroller.h"
 
 namespace venus_hardware
 {
-class VenusSystemPositionOnlyHardware
+class VenusHardwareInterface
 : public hardware_interface::BaseInterface<hardware_interface::SystemInterface>
 {
 public:
-  RCLCPP_SHARED_PTR_DEFINITIONS(VenusSystemPositionOnlyHardware)
+  RCLCPP_SHARED_PTR_DEFINITIONS(VenusHardwareInterface)
 
   VENUS_HARDWARE_PUBLIC
   hardware_interface::return_type configure(const hardware_interface::HardwareInfo & info) override;
@@ -60,19 +73,15 @@ public:
   hardware_interface::return_type write() override;
 
 private:
-  // // Parameters for the Venus simulation
-  double hw_start_sec_;
-  double hw_stop_sec_;
-  // double hw_slowdown_;
-
-  // Store the command for the simulated robot
+  // Store the command and states of the robot
   std::vector<double> hw_commands_;
   std::vector<double> hw_states_;
 
+  // Control of the actuator
   ActuatorController* pController_;
   std::vector<ActuatorController::UnifiedID> uIDArray_;
 };
 
 }  // namespace venus_hardware
 
-#endif  // VENUS_HARDWARE__RRBOT_SYSTEM_POSITION_ONLY_HPP_
+#endif  // VENUS_HARDWARE__HARDWARE_INTERFACE_HPP_

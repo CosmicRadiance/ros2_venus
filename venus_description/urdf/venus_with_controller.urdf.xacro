@@ -37,7 +37,7 @@ https://github.com/ros-controls/ros2_control_demos/blob/master/ros2_control_demo
   <!-- <xacro:rrbot_gazebo prefix="$(arg prefix)" /> -->
 
   <xacro:venus_control
-    name="VenusSystemPositionOnly" prefix="$(arg prefix)"
+    name="VenusHardwareInterface" prefix="$(arg prefix)"
     use_fake_hardware="$(arg use_fake_hardware)"
     fake_sensor_commands="$(arg fake_sensor_commands)" />
 

@@ -1,4 +1,4 @@
-// Copyright 2020 ros2_control Development Team
+// Copyright 2021 Lenove Research Shanghai
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//----------------------------------------------------------------------
+/*!\file
+ *
+ * \author  Yulei Qiu ray.yuleiqiu@gmail.com
+ * \date    2021-09-06
+ *
+ */
+//----------------------------------------------------------------------
+
+// System
 #include <iostream>
 #include <chrono>
 #include <cmath>
@@ -19,10 +29,11 @@
 #include <memory>
 #include <vector>
 
+// ROS
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-#include "venus_hardware/venus_system_position_only.hpp"
+#include "venus_hardware/venus_position_hardware_interface.hpp"
 
 #define AXIS_JOINT_INDEX_MAX  5
 #define DEG_TO_RAD(x) ((x)*M_PI / 180.0)
@@ -35,7 +46,7 @@
 
 namespace venus_hardware
 {
-hardware_interface::return_type VenusSystemPositionOnlyHardware::configure(
+hardware_interface::return_type VenusHardwareInterface::configure(
   const hardware_interface::HardwareInfo & info)
 {
   if (configure_default(info) != hardware_interface::return_type::OK)
@@ -43,19 +54,15 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::configure(
     return hardware_interface::return_type::ERROR;
   }
 
-  hw_start_sec_ = stod(info_.hardware_parameters["example_param_hw_start_duration_sec"]);
-  hw_stop_sec_ = stod(info_.hardware_parameters["example_param_hw_stop_duration_sec"]);
-  // hw_slowdown_ = stod(info_.hardware_parameters["example_param_hw_slowdown"]);
   hw_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
   hw_commands_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
 
   for (const hardware_interface::ComponentInfo & joint : info_.joints)
   {
-    // VenusSystemPositionOnly has exactly one state and command interface on each joint
     if (joint.command_interfaces.size() != 1)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+        rclcpp::get_logger("VenusHardwareInterface"),
         "Joint '%s' has %d command interfaces found. 1 expected.", joint.name.c_str(),
         joint.command_interfaces.size());
       return hardware_interface::return_type::ERROR;
@@ -64,7 +71,7 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::configure(
     if (joint.command_interfaces[0].name != hardware_interface::HW_IF_POSITION)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+        rclcpp::get_logger("VenusHardwareInterface"),
         "Joint '%s' have %s command interfaces found. '%s' expected.", joint.name.c_str(),
         joint.command_interfaces[0].name.c_str(), hardware_interface::HW_IF_POSITION);
       return hardware_interface::return_type::ERROR;
@@ -73,7 +80,7 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::configure(
     if (joint.state_interfaces.size() != 1)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+        rclcpp::get_logger("VenusHardwareInterface"),
         "Joint '%s' has %d state interface. 1 expected.", joint.name.c_str(),
         joint.state_interfaces.size());
       return hardware_interface::return_type::ERROR;
@@ -82,7 +89,7 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::configure(
     if (joint.state_interfaces[0].name != hardware_interface::HW_IF_POSITION)
     {
       RCLCPP_FATAL(
-        rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+        rclcpp::get_logger("VenusHardwareInterface"),
         "Joint '%s' have %s state interface. '%s' expected.", joint.name.c_str(),
         joint.state_interfaces[0].name.c_str(), hardware_interface::HW_IF_POSITION);
       return hardware_interface::return_type::ERROR;
@@ -91,13 +98,13 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::configure(
 
   status_ = hardware_interface::status::CONFIGURED;
   RCLCPP_INFO(
-    rclcpp::get_logger("VenusSystemPositionOnlyHardware"), 
-    "VenusSystemPositionOnlyHardware Ready.");
+    rclcpp::get_logger("VenusHardwareInterface"), 
+    "VenusHardwareInterface Ready.");
   return hardware_interface::return_type::OK;
 }
 
 std::vector<hardware_interface::StateInterface>
-VenusSystemPositionOnlyHardware::export_state_interfaces()
+VenusHardwareInterface::export_state_interfaces()
 {
   std::vector<hardware_interface::StateInterface> state_interfaces;
   for (uint i = 0; i < info_.joints.size(); i++)
@@ -110,7 +117,7 @@ VenusSystemPositionOnlyHardware::export_state_interfaces()
 }
 
 std::vector<hardware_interface::CommandInterface>
-VenusSystemPositionOnlyHardware::export_command_interfaces()
+VenusHardwareInterface::export_command_interfaces()
 {
   std::vector<hardware_interface::CommandInterface> command_interfaces;
   for (uint i = 0; i < info_.joints.size(); i++)
@@ -122,17 +129,9 @@ VenusSystemPositionOnlyHardware::export_command_interfaces()
   return command_interfaces;
 }
 
-hardware_interface::return_type VenusSystemPositionOnlyHardware::start()
+hardware_interface::return_type VenusHardwareInterface::start()
 {
-  RCLCPP_INFO(rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "Starting ...please wait...");
-
-  for (int i = 0; i < hw_start_sec_; i++)
-  {
-    rclcpp::sleep_for(std::chrono::seconds(1));
-    RCLCPP_INFO(
-      rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "%.1f seconds left...",
-      hw_start_sec_ - i);
-  }
+  RCLCPP_INFO(rclcpp::get_logger("VenusHardwareInterface"), "Starting ...please wait...");
 
   pController_ = ActuatorController::initController();
   Actuator::ErrorsDefine ec;
@@ -140,18 +139,18 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::start()
   if (uIDArray_.size() > 0)
   {
     RCLCPP_INFO(
-      rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+      rclcpp::get_logger("VenusHardwareInterface"),
       "The connected actuators have been found!");
     if (pController_->enableActuatorInBatch(uIDArray_))
     {
       RCLCPP_INFO(
-        rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+        rclcpp::get_logger("VenusHardwareInterface"),
         "All actuators have been enabled successfully!");
     }
     else
     {
       RCLCPP_ERROR(
-        rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+        rclcpp::get_logger("VenusHardwareInterface"),
         "Failed to enable actuators");
     }
     for(size_t k = 0; k < uIDArray_.size(); k++)
@@ -159,7 +158,7 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::start()
       ActuatorController::UnifiedID actuator = uIDArray_.at(k);
       pController_->activateActuatorMode(actuator.actuatorID, Actuator::Mode_Profile_Pos);
       RCLCPP_INFO(
-        rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+        rclcpp::get_logger("VenusHardwareInterface"),
         "Set the position of actuator %d to zero, be careful.", actuator.actuatorID);
       pController_->setPosition(actuator.actuatorID, 0);
       std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -168,7 +167,7 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::start()
   else
   {
     RCLCPP_ERROR(
-      rclcpp::get_logger("VenusSystemPositionOnlyHardware"),
+      rclcpp::get_logger("VenusHardwareInterface"),
       "Connected error code: %x", ec);
       return hardware_interface::return_type::ERROR;
   }
@@ -190,22 +189,14 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::start()
   status_ = hardware_interface::status::STARTED;
 
   RCLCPP_INFO(
-    rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "System Successfully started!");
+    rclcpp::get_logger("VenusHardwareInterface"), "System Successfully started!");
 
   return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type VenusSystemPositionOnlyHardware::stop()
+hardware_interface::return_type VenusHardwareInterface::stop()
 {
-  RCLCPP_INFO(rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "Stopping ...please wait...");
-
-  for (int i = 0; i < hw_stop_sec_; i++)
-  {
-    rclcpp::sleep_for(std::chrono::seconds(1));
-    RCLCPP_INFO(
-      rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "%.1f seconds left...",
-      hw_stop_sec_ - i);
-  }
+  RCLCPP_INFO(rclcpp::get_logger("VenusHardwareInterface"), "Stopping ...please wait...");
 
   // Disable all connected actuators
   pController_->disableAllActuators();
@@ -214,14 +205,14 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::stop()
   status_ = hardware_interface::status::STOPPED;
 
   RCLCPP_INFO(
-    rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "System successfully stopped!");
+    rclcpp::get_logger("VenusHardwareInterface"), "System successfully stopped!");
 
   return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type VenusSystemPositionOnlyHardware::read()
+hardware_interface::return_type VenusHardwareInterface::read()
 {
-  RCLCPP_INFO(rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "Reading...");
+  RCLCPP_INFO(rclcpp::get_logger("VenusHardwareInterface"), "Reading...");
 
   for (uint i = 0; i < hw_states_.size(); i++)
   {
@@ -230,17 +221,17 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::read()
     else hw_states_[i] = pController_->getPosition(actuator.actuatorID, true);
     hw_states_[i] = POS_TO_RAD(hw_states_[i]);
     RCLCPP_INFO(
-      rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "Got state %.5f for joint %d!",
+      rclcpp::get_logger("VenusHardwareInterface"), "Got state %.5f for joint %d!",
       hw_states_[i], i);
   }
-  RCLCPP_INFO(rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "Joints successfully read!");
+  RCLCPP_INFO(rclcpp::get_logger("VenusHardwareInterface"), "Joints successfully read!");
 
   return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type VenusSystemPositionOnlyHardware::write()
+hardware_interface::return_type VenusHardwareInterface::write()
 {
-  RCLCPP_INFO(rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "Writing...");
+  RCLCPP_INFO(rclcpp::get_logger("VenusHardwareInterface"), "Writing...");
 
   for (uint i = 0; i < hw_commands_.size(); i++)
   {
@@ -253,11 +244,11 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::write()
     }
     else pController_->setPosition(actuator.actuatorID, RAD_TO_POS(hw_commands_[i]));
     RCLCPP_INFO(
-      rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "Got command %.5f for joint %d!",
+      rclcpp::get_logger("VenusHardwareInterface"), "Got command %.5f for joint %d!",
       hw_commands_[i], i);
   }
   RCLCPP_INFO(
-    rclcpp::get_logger("VenusSystemPositionOnlyHardware"), "Joints successfully written!");
+    rclcpp::get_logger("VenusHardwareInterface"), "Joints successfully written!");
 
   return hardware_interface::return_type::OK;
 }
@@ -267,4 +258,4 @@ hardware_interface::return_type VenusSystemPositionOnlyHardware::write()
 #include "pluginlib/class_list_macros.hpp"
 
 PLUGINLIB_EXPORT_CLASS(
-  venus_hardware::VenusSystemPositionOnlyHardware, hardware_interface::SystemInterface)
+  venus_hardware::VenusHardwareInterface, hardware_interface::SystemInterface)

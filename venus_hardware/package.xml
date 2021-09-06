@@ -4,7 +4,7 @@
 <package format="3">
   <name>venus_hardware</name>
   <version>1.0.0</version>
-  <description>Package of `ros2_control` Hardware. The package is used with `venus_bringup` package.</description>
+  <description>Package of `ros2_control` Hardware.</description>
 
   <maintainer email="ray.yuleiqiu@gmail.com">Yulei Qiu</maintainer>
 
