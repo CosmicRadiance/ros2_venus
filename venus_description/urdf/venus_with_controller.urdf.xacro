@@ -11,7 +11,6 @@ https://github.com/ros-controls/ros2_control_demos/blob/master/ros2_control_demo
   <xacro:arg name="use_fake_hardware" default="false" />
   <xacro:arg name="fake_sensor_commands" default="false" />
   <xacro:arg name="prefix" default="" />
-  <xacro:arg name="slowdown" default="2.0" />
 
   <!-- Import Venus macro -->
   <xacro:include filename="$(find venus_description)/urdf/venus_description.urdf.xacro" />
@@ -23,7 +22,7 @@ https://github.com/ros-controls/ros2_control_demos/blob/master/ros2_control_demo
   <xacro:include filename="$(find venus_description)/gazebo/venus.materials.xacro" />
 
   <!-- Import Venus ros2_control description -->
-  <xacro:include filename="$(find venus_description)/ros2_control/venus_system_position_only.ros2_control.xacro" />
+  <xacro:include filename="$(find venus_description)/ros2_control/venus.ros2_control.xacro" />
 
   <!-- Used for fixing robot -->
   <link name="world"/>
@@ -37,10 +36,9 @@ https://github.com/ros-controls/ros2_control_demos/blob/master/ros2_control_demo
 
   <!-- <xacro:rrbot_gazebo prefix="$(arg prefix)" /> -->
 
-  <xacro:venus_system_position_only
+  <xacro:venus_control
     name="VenusSystemPositionOnly" prefix="$(arg prefix)"
     use_fake_hardware="$(arg use_fake_hardware)"
-    fake_sensor_commands="$(arg fake_sensor_commands)"
-    slowdown="$(arg slowdown)" />
+    fake_sensor_commands="$(arg fake_sensor_commands)" />
 
 </robot>

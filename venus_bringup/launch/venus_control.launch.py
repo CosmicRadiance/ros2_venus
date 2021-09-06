@@ -60,12 +60,6 @@ def generate_launch_description():
         )
     )
 
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "slowdown", default_value="3.0", description="Slowdown factor of the Venus."
-        )
-    )
-
     # Get URDF via xacro
     robot_description_content = Command(
         [
@@ -75,7 +69,7 @@ def generate_launch_description():
                 [
                     FindPackageShare("venus_description"),
                     "urdf",
-                    "venus_system_position_only.urdf.xacro",
+                    "venus_with_controller.urdf.xacro",
                 ]
             ),
             " prefix:=",
@@ -84,8 +78,6 @@ def generate_launch_description():
             LaunchConfiguration("use_fake_hardware"),
             " fake_sensor_commands:=",
             LaunchConfiguration("fake_sensor_commands"),
-            " slowdown:=",
-            LaunchConfiguration("slowdown"),
         ]
     )
     robot_description = {"robot_description": robot_description_content}
