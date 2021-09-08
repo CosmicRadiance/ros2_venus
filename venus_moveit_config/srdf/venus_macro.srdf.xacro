@@ -8,61 +8,57 @@
 -->
   <xacro:macro name="venus_srdf" params="name prefix">
     <!--
-      GROUPS
-      Representation of a set of joints and links.
+      GROUPS - Representation of a set of joints and links.
       This can be useful for specifying DOF to plan for, defining arms, end effectors, etc
     -->
     <!--
-      LINKS
-      When a link is specified, the parent joint of that link (if it exists) is automatically included
+      LINKS - When a link is specified, the parent joint of that link (if it exists) is automatically included
     -->
     <!--
-      JOINTS
-      When a joint is specified, the child link of that joint
+      JOINTS - When a joint is specified, the child link of that joint
       (which will always exist) is automatically included
     -->
     <!--
-      CHAINS
-      When a chain is specified, all the links along the chain (including endpoints)
+      CHAINS - When a chain is specified, all the links along the chain (including endpoints)
       are included in the group. Additionally, all the joints that are parents to included
       links are also included. This means that joints along the chain and the parent joint of the
       base link are included in the group
     -->
     <!--
-      SUBGROUPS
-      Groups can also be formed by referencing to already defined group names
+      SUBGROUPS - Groups can also be formed by referencing to already defined group names
     -->
     <group name="${prefix}${name}_manipulator">
-      <chain base_link="${prefix}base_link" tip_link="${prefix}link5" />
+      <joint name="${prefix}base_joint"/>
+      <joint name="joint1"/>
+      <joint name="joint2"/>
+      <joint name="joint3"/>
+      <joint name="joint4"/>
+      <joint name="joint5"/>
     </group>
     <!--
-      GROUP STATES
-      Purpose
-      Define a named state for a particular group, 
+      GROUP STATES - Purpose - Define a named state for a particular group, 
       in terms of joint values. This is useful to define states like 'folded arms'
     -->
     <group_state name="${prefix}home" group="${prefix}${name}_manipulator">
-        <joint name="joint1" value="0"/>
-        <joint name="joint2" value="0"/>
-        <joint name="joint3" value="0"/>
-        <joint name="joint4" value="0"/>
-        <joint name="joint5" value="0"/>
+        <joint name="${prefix}joint1" value="0"/>
+        <joint name="${prefix}joint2" value="0"/>
+        <joint name="${prefix}joint3" value="0"/>
+        <joint name="${prefix}joint4" value="0"/>
+        <joint name="${prefix}joint5" value="0"/>
     </group_state>
     <!--
-      END EFFECTOR
-      Purpose
-      Represent information about an end effector.
+      END EFFECTOR - Purpose - Represent information about an end effector.
     -->
+    <end_effector name="end_effector" parent_link="${prefix}link5" group="${prefix}${name}_manipulator" />
     <!--
-      VIRTUAL JOINT
-      Purpose
-      this element defines a virtual joint between a robot link and an external
+      VIRTUAL JOINT - Purpose - this element defines a virtual joint between a robot link and an external
       frame of reference (considered fixed with respect to the robot)
     -->
-    <virtual_joint name="${prefix}fixed_base" type="fixed" parent_frame="world" child_link="${prefix}base_link" />
+    <!-- <virtual_joint
+      name="${prefix}fixed_base" type="fixed"
+      parent_frame="world" child_link="${prefix}base_link" /> -->
     <!--
-      DISABLE COLLISIONS
-      By default it is assumed that any link of the robot could potentially
+      DISABLE COLLISIONS - By default it is assumed that any link of the robot could potentially
       come into collision with any other link in the robot. This tag disables collision checking between
       a specified pair of links.
     -->

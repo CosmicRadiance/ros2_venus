@@ -60,6 +60,14 @@ def generate_launch_description():
         )
     )
 
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "robot_controller",
+            default_value="joint_trajectory_controller",
+            description="Robot controller to start.",
+        )
+    )
+
     # Get URDF via xacro
     robot_description_content = Command(
         [
@@ -90,28 +98,11 @@ def generate_launch_description():
         ]
     )
 
-    node_robot_state_publisher = Node(
+    robot_state_publisher_node = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
         output="screen",
         parameters=[robot_description],
-    )
-
-    controller_manager_node = Node(
-        package="controller_manager",
-        executable="ros2_control_node",
-        parameters=[robot_description, robot_controllers],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
-    )
-
-    spawn_jsb_controller = Node(
-        package="controller_manager",
-        executable="spawner.py",
-        arguments=["joint_state_broadcaster"],
-        output="screen",
     )
 
     rviz_config_file = PathJoinSubstitution(
@@ -125,10 +116,34 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration("start_rviz")),
     )
 
+    controller_manager_node = Node(
+        package="controller_manager",
+        executable="ros2_control_node",
+        parameters=[robot_description, robot_controllers],
+        output={
+            "stdout": "screen",
+            "stderr": "screen",
+        },
+    )
+
+    joint_state_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=["joint_state_broadcaster", "-c", "/controller_manager"],
+        output="screen",
+    )
+
+    robot_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner.py",
+        arguments=[LaunchConfiguration("robot_controller"), "-c", "/controller_manager"],
+    )
+
     nodes = [
-        controller_manager_node,
-        node_robot_state_publisher,
-        spawn_jsb_controller,
+        robot_state_publisher_node,
         rviz_node,
+        controller_manager_node,
+        joint_state_broadcaster_spawner,
+        robot_controller_spawner,
     ]
     return LaunchDescription(declared_arguments + nodes)
