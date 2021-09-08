@@ -24,7 +24,7 @@ def generate_launch_description():
         [
             FindPackageShare("venus_bringup"),
             "config",
-            "venus_joint_trajectory_publisher.yaml",
+            "venus_forward_position_publisher.yaml",
         ]
     )
 
@@ -32,8 +32,8 @@ def generate_launch_description():
         [
             Node(
                 package="venus_test_nodes",
-                executable="publisher_joint_trajectory_controller",
-                name="publisher_joint_trajectory_controller",
+                executable="publisher_forward_position_controller",
+                name="publisher_forward_position_controller",
                 parameters=[position_goals],
                 output={
                     "stdout": "screen",
