@@ -43,6 +43,8 @@
 
 #define RAD_TO_POS(x) ((x / (2 * M_PI)) * STEERING_GEAR_RATIO)
 #define POS_TO_RAD(x) ((x * (2 * M_PI)) / STEERING_GEAR_RATIO)
+#define RPS_TO_RPM(x) RAD_TO_POS(x) * 60
+#define RPM_TO_RPS(x) POS_TO_RAD(x) / 60
 
 namespace venus_hardware
 {
@@ -54,16 +56,18 @@ hardware_interface::return_type VenusHardwareInterface::configure(
     return hardware_interface::return_type::ERROR;
   }
 
-  hw_states_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
-  hw_commands_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
+  hw_positions_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
+  hw_velocities_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
+  hw_position_commands_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
+  hw_velocity_commands_.resize(info_.joints.size(), std::numeric_limits<double>::quiet_NaN());
 
   for (const hardware_interface::ComponentInfo & joint : info_.joints)
   {
-    if (joint.command_interfaces.size() != 1)
+    if (joint.command_interfaces.size() != 2)
     {
       RCLCPP_FATAL(
         rclcpp::get_logger("VenusHardwareInterface"),
-        "Joint '%s' has %d command interfaces found. 1 expected.", joint.name.c_str(),
+        "Joint '%s' has %d command interfaces found. 2 expected.", joint.name.c_str(),
         joint.command_interfaces.size());
       return hardware_interface::return_type::ERROR;
     }
@@ -77,11 +81,20 @@ hardware_interface::return_type VenusHardwareInterface::configure(
       return hardware_interface::return_type::ERROR;
     }
 
-    if (joint.state_interfaces.size() != 1)
+    if (joint.command_interfaces[1].name != hardware_interface::HW_IF_VELOCITY)
     {
       RCLCPP_FATAL(
         rclcpp::get_logger("VenusHardwareInterface"),
-        "Joint '%s' has %d state interface. 1 expected.", joint.name.c_str(),
+        "Joint '%s' have %s command interfaces found. '%s' expected.", joint.name.c_str(),
+        joint.command_interfaces[1].name.c_str(), hardware_interface::HW_IF_VELOCITY);
+      return hardware_interface::return_type::ERROR;
+    }
+
+    if (joint.state_interfaces.size() != 2)
+    {
+      RCLCPP_FATAL(
+        rclcpp::get_logger("VenusHardwareInterface"),
+        "Joint '%s' has %d state interface. 2 expected.", joint.name.c_str(),
         joint.state_interfaces.size());
       return hardware_interface::return_type::ERROR;
     }
@@ -92,6 +105,15 @@ hardware_interface::return_type VenusHardwareInterface::configure(
         rclcpp::get_logger("VenusHardwareInterface"),
         "Joint '%s' have %s state interface. '%s' expected.", joint.name.c_str(),
         joint.state_interfaces[0].name.c_str(), hardware_interface::HW_IF_POSITION);
+      return hardware_interface::return_type::ERROR;
+    }
+
+    if (joint.state_interfaces[1].name != hardware_interface::HW_IF_VELOCITY)
+    {
+      RCLCPP_FATAL(
+        rclcpp::get_logger("VenusHardwareInterface"),
+        "Joint '%s' have %s state interface. '%s' expected.", joint.name.c_str(),
+        joint.state_interfaces[1].name.c_str(), hardware_interface::HW_IF_VELOCITY);
       return hardware_interface::return_type::ERROR;
     }
   }
@@ -110,7 +132,10 @@ VenusHardwareInterface::export_state_interfaces()
   for (uint i = 0; i < info_.joints.size(); i++)
   {
     state_interfaces.emplace_back(hardware_interface::StateInterface(
-      info_.joints[i].name, hardware_interface::HW_IF_POSITION, &hw_states_[i]));
+      info_.joints[i].name, hardware_interface::HW_IF_POSITION, &hw_positions_[i]));
+    
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+      info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &hw_velocities_[i]));
   }
 
   return state_interfaces;
@@ -123,7 +148,10 @@ VenusHardwareInterface::export_command_interfaces()
   for (uint i = 0; i < info_.joints.size(); i++)
   {
     command_interfaces.emplace_back(hardware_interface::CommandInterface(
-      info_.joints[i].name, hardware_interface::HW_IF_POSITION, &hw_commands_[i]));
+      info_.joints[i].name, hardware_interface::HW_IF_POSITION, &hw_position_commands_[i]));
+
+    command_interfaces.emplace_back(hardware_interface::CommandInterface(
+      info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &hw_velocity_commands_[i]));
   }
 
   return command_interfaces;
@@ -173,16 +201,23 @@ hardware_interface::return_type VenusHardwareInterface::start()
   }
 
   // set some default values when starting the first time
-  for (uint i = 0; i < hw_states_.size(); i++)
+  for (uint i = 0; i < hw_positions_.size(); i++)
   {
-    if (std::isnan(hw_states_[i]))
+    if (std::isnan(hw_positions_[i]))
     {
-      hw_states_[i] = 0;
-      hw_commands_[i] = 0;
+      hw_positions_[i] = 0;
     }
-    else
+    if (std::isnan(hw_velocities_[i]))
     {
-      hw_commands_[i] = hw_states_[i];
+      hw_velocities_[i] = 0;
+    }
+    if (std::isnan(hw_position_commands_[i]))
+    {
+      hw_position_commands_[i] = 0;
+    }
+    if (std::isnan(hw_velocity_commands_[i]))
+    {
+      hw_velocity_commands_[i] = 0;
     }
   }
 
@@ -212,43 +247,63 @@ hardware_interface::return_type VenusHardwareInterface::stop()
 
 hardware_interface::return_type VenusHardwareInterface::read()
 {
-  RCLCPP_INFO(rclcpp::get_logger("VenusHardwareInterface"), "Reading...");
+  // RCLCPP_INFO(rclcpp::get_logger("VenusHardwareInterface"), "Reading...");
 
-  for (uint i = 0; i < hw_states_.size(); i++)
+  for (uint i = 0; i < hw_positions_.size(); i++)
   {
     ActuatorController::UnifiedID actuator = uIDArray_.at(i);
-    if (i > 1) hw_states_[i] = pController_->getPosition(uint8_t(actuator.actuatorID+1), true);
-    else hw_states_[i] = pController_->getPosition(actuator.actuatorID, true);
-    hw_states_[i] = POS_TO_RAD(hw_states_[i]);
-    RCLCPP_INFO(
-      rclcpp::get_logger("VenusHardwareInterface"), "Got state %.5f for joint %d!",
-      hw_states_[i], i);
+    if (i > 1)
+    {
+      hw_positions_[i] = pController_->getPosition(uint8_t(actuator.actuatorID+1), true);
+      hw_velocities_[i] = pController_->getVelocity(uint8_t(actuator.actuatorID+1), true);
+    }
+    else
+    {
+      hw_positions_[i] = pController_->getPosition(actuator.actuatorID, true);
+      hw_velocities_[i] = pController_->getVelocity(actuator.actuatorID, true);
+    }
+    hw_positions_[i] = POS_TO_RAD(hw_positions_[i]);
+    hw_velocities_[i] = RPM_TO_RPS(hw_velocities_[i]);
+    // RCLCPP_INFO(
+    //   rclcpp::get_logger("VenusHardwareInterface"), "Got state %.5f for joint %d!",
+    //   hw_positions_[i], i);
   }
-  RCLCPP_INFO(rclcpp::get_logger("VenusHardwareInterface"), "Joints successfully read!");
+  // RCLCPP_INFO(rclcpp::get_logger("VenusHardwareInterface"), "Joints successfully read!");
 
   return hardware_interface::return_type::OK;
 }
 
 hardware_interface::return_type VenusHardwareInterface::write()
 {
-  RCLCPP_INFO(rclcpp::get_logger("VenusHardwareInterface"), "Writing...");
+  // RCLCPP_INFO(rclcpp::get_logger("VenusHardwareInterface"), "Writing...");
 
-  for (uint i = 0; i < hw_commands_.size(); i++)
+  for (uint i = 0; i < hw_position_commands_.size(); i++)
   {
     ActuatorController::UnifiedID actuator = uIDArray_.at(i);
-    if (i > 1) pController_->setPosition(uint8_t(actuator.actuatorID+1), RAD_TO_POS(hw_commands_[i]));
+    if (i > 1)
+    {
+      pController_->setPosition(uint8_t(actuator.actuatorID+1), RAD_TO_POS(hw_position_commands_[i]));
+      // pController_->setVelocity(uint8_t(actuator.actuatorID+1), RPS_TO_RPM(hw_velocity_commands_[i]));
+    }
     else if (i == 1)
     {
-      pController_->setPosition(actuator.actuatorID, RAD_TO_POS(hw_commands_[i]));
-      pController_->setPosition(uint8_t(actuator.actuatorID+1), -1*RAD_TO_POS(hw_commands_[i]));
+      pController_->setPosition(actuator.actuatorID, RAD_TO_POS(hw_position_commands_[i]));
+      // pController_->setVelocity(actuator.actuatorID, RPS_TO_RPM(hw_velocity_commands_[i]));
+      pController_->setPosition(uint8_t(actuator.actuatorID+1), -1*RAD_TO_POS(hw_position_commands_[i]));
+      // pController_->setVelocity(uint8_t(actuator.actuatorID+1), -1*RPS_TO_RPM(hw_velocity_commands_[i]));
     }
-    else pController_->setPosition(actuator.actuatorID, RAD_TO_POS(hw_commands_[i]));
-    RCLCPP_INFO(
-      rclcpp::get_logger("VenusHardwareInterface"), "Got command %.5f for joint %d!",
-      hw_commands_[i], i);
+    else
+    {
+      pController_->setPosition(actuator.actuatorID, RAD_TO_POS(hw_position_commands_[i]));
+      // pController_->setVelocity(actuator.actuatorID, RPS_TO_RPM(hw_velocity_commands_[i]));
+
+    } 
+    // RCLCPP_INFO(
+    //   rclcpp::get_logger("VenusHardwareInterface"), "Got command %.5f for joint %d!",
+    //   hw_position_commands_[i], i);
   }
-  RCLCPP_INFO(
-    rclcpp::get_logger("VenusHardwareInterface"), "Joints successfully written!");
+  // RCLCPP_INFO(
+  //   rclcpp::get_logger("VenusHardwareInterface"), "Joints successfully written!");
 
   return hardware_interface::return_type::OK;
 }

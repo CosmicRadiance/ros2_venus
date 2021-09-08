@@ -74,8 +74,10 @@ public:
 
 private:
   // Store the command and states of the robot
-  std::vector<double> hw_commands_;
-  std::vector<double> hw_states_;
+  std::vector<double> hw_position_commands_;
+  std::vector<double> hw_velocity_commands_;
+  std::vector<double> hw_positions_;
+  std::vector<double> hw_velocities_;
 
   // Control of the actuator
   ActuatorController* pController_;
