@@ -11,3 +11,16 @@ This repository contains ROS packages meant to be used with Venus Manipulator. P
 ## Requirements
 - Computer running Ubuntu Linux 20.04 (note that virtual Linux machines have NOT been tested)
 - A Venus Manipulator
+
+## Install
+Clone this repository:
+```
+mkdir -p ~/arm_ws/src
+cd ~/dev_ws/src
+git clone xxxx
+```
+Download actuator's SDK:
+```
+git clone https://github.com/innfos/innfos-cpp-sdk.git
+```
+then manually copy innfos-cpp-sdk/sdk to venus_description/ActuatorController_SDK
