@@ -1,65 +1,13 @@
-# Venus Manipulator
-## To-do
-- [x] Visualize the manipulator using xacro macro
-- [x] Implement controllers similar to ros2_control_demo package
-- [ ] Transfer Moveit configuration to ROS 2
-- [ ] Realize control the movement via actutaor SDK
+# Venus Manipulator ROS Packages
+## Overview
+This repository contains ROS packages meant to be used with Venus Manipulator. Packages were developed and tested on Ubuntu 20.04 using ROS 2 Foxy. Additionally, all ROS nodes were written using Python or C++. However, any programming language capable of sending ROS messages can be used to control the robots. To that effect, the core packages inside this repo are as follows:
 
-## Test in Rviz 2
-1. To start the manipulator, open a terminal, source the ROS2-workspace and execute its launch file with:
-```
-ros2 launch ros2_control_demo_bringup rrbot.launch.py
-```
+- venus_bringup - contains combined launch files intergating all the functionalities
+- venus_description - contains the meshes and URDFs
+- venus_hardware - contains hardware interface files used to interact with actuators on joints
+- venus_moveit_config - contains the configuration files necessary to launch an arm using MoveIt either on the physical robot, or just in Rviz
+- venus_test_nodes - contains test files, can be viewed as examples or demos
 
-2. Check if the hardware interface loaded properly, by opening another terminal and executing:
-```
-ros2 control list_hardware_interfaces
-```
-
-3. Check if controllers are running:
-```
-ros2 control list_controllers
-```
-
-4. Start a demo node which sends goals every 5 seconds in a loop:
-```
-ros2 launch venus_bringup test_forward_position_controller.launch.py
-```
-
-## ROS Command for actuator test
-### Activate all the actuators
-    rostopic pub -1 /INNFOS/enableActuator actuatorcontroller_ros/ActuatorArray "JointIDs:
-    - 0"
-If the power light flashes green, the actuators successfully start up.
-
-### Change acutator mode to position profile
-    rostopic pub -1 /INNFOS/setControlMode actuatorcontroller_ros/ActuatorModes "JointIDs: [1,2,3,4,5,6]
-    ActuatorMode: 4"
-
-### Hardcoded positions for test
-    rostopic pub /INNFOS/actuator_targets sensor_msgs/JointState "header:
-        seq: 0
-        stamp: {secs: 0, nsecs: 0}
-        frame_id: ''
-    name: ['1','2','3','4','5','6']
-    position: [0,0,0,0,0,0]
-    velocity: [0,0,0,0,0,0]
-    effort: [0,0,0,0,0,0]"
-
-    rostopic pub /INNFOS/actuator_targets sensor_msgs/JointState "header:
-        seq: 0
-        stamp: {secs: 0, nsecs: 0}
-        frame_id: ''
-    name: ['1','2','3','4','5','6']
-    position: [0,-6,6,-10,0,0]
-    velocity: [0,0,0,0,0,0]
-    effort: [0,0,0,0,0,0]"
-
-    rostopic pub /INNFOS/actuator_targets sensor_msgs/JointState "header:
-        seq: 0
-        stamp: {secs: 0, nsecs: 0}
-        frame_id: ''
-    name: ['1','2','3','4','5','6']
-    position: [3,-12,12,-15,0,0]
-    velocity: [0,0,0,0,0,0]
-    effort: [0,0,0,0,0,0]"
+## Requirements
+- Computer running Ubuntu Linux 20.04 (note that virtual Linux machines have NOT been tested)
+- A Venus Manipulator
