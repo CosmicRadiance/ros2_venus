@@ -1,4 +1,7 @@
 # Venus Manipulator ROS Packages
+
+![](images/main_overview.png)
+
 ## Overview
 This repository contains ROS packages meant to be used with Venus Manipulator. Packages were developed and tested on Ubuntu 20.04 using ROS 2 Foxy. Additionally, all ROS nodes were written using Python or C++. However, any programming language capable of sending ROS messages can be used to control the robots. To that effect, the core packages inside this repo are as follows:
 
