@@ -8,7 +8,8 @@ This package contains the URDFs and meshes for the Venus Manipulator. The STL fi
 ## Structure
 ```
 .
-├── ActuatorController_SDK
+├── ActuatorController_SDK (not included here)
+├── config
 ├── gazebo
 ├── launch
 ├── meshes
@@ -18,6 +19,9 @@ This package contains the URDFs and meshes for the Venus Manipulator. The STL fi
 ```
 ### ActuatorController_SDK
 This folder contains the SDK of the actuator.
+
+### config
+This folder contains the config files of RViz, including plugins, window size and initial viewing pose.
 
 ### gazebo
 This folder contains color config files
