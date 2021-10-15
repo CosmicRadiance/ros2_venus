@@ -7,7 +7,7 @@ This package contains the URDFs and meshes for the Venus Manipulator. The STL fi
 
 ## Structure
 ```
-.
+venus_description/
 ├── ActuatorController_SDK (not included here)
 ├── config
 ├── gazebo
@@ -18,7 +18,7 @@ This package contains the URDFs and meshes for the Venus Manipulator. The STL fi
 └── urdf
 ```
 ### ActuatorController_SDK
-This folder contains the SDK of the actuator.
+This folder contains the driver of the actuator. The motion of the manipulator is realized by the rotation of each joint, i.e. the roation of each actutaot. 
 
 ### config
 This folder contains the config files of RViz, including plugins, window size and initial viewing pose.
@@ -33,13 +33,15 @@ This folder contains launch file for visualization
 This folder contains STL files for each part of the manipulator
 
 ### ros2_control
-This folder contains ros2_control config files. It also defines whether to use fake hardware or not. The joint config including the type of the interface and the limits are also defined.
+This folder contains the hardware description file. It also defines whether to use fake hardware or not. The joint config including the type of the interface and the limits are also defined.
 
 ### src
 This folder contains a demo ros2 node. It allows the user to make the manipulator move by draging the slider on the GUI of joint state publisher.
 
 ### urdf
-This folder contains URDFs of the manipulator.
+This folder contains URDFs of the manipulator. `venus_description.urdf.xacro` contains the macro definitions, working as a base of the URDF files. `venus.urdf.xacro` is the main URDF description which includes macros, Rviz colors and a fixed point for the base link. `venus_with_controller.urdf.xacro` is written based on `venus.urdf.xacro`, plus the controller description.
+
+For more details of the controller and hardware, check http://control.ros.org/getting_started.html#hardware-components
 
 
 
