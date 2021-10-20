@@ -141,9 +141,9 @@ def generate_launch_description():
 
     nodes = [
         robot_state_publisher_node,
+        joint_state_broadcaster_spawner,
         rviz_node,
         controller_manager_node,
-        joint_state_broadcaster_spawner,
         robot_controller_spawner,
     ]
     return LaunchDescription(declared_arguments + nodes)

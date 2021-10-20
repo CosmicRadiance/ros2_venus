@@ -26,6 +26,7 @@ This repository contains ROS packages meant to be used with Venus Manipulator. P
 - A Venus Manipulator
 
 ## Install
+### Software
 Clone this repository:
 ```
 mkdir -p ~/arm_ws/src
@@ -36,4 +37,32 @@ Download actuator's SDK:
 ```
 git clone https://github.com/innfos/innfos-cpp-sdk.git
 ```
-then manually copy innfos-cpp-sdk/sdk to venus_description/ActuatorController_SDK
+then manually copy innfos-cpp-sdk/sdk to venus_description/ActuatorController_SDK.
+
+Note that the actuator SDK is necessary to make the physical manipulator move.
+### Hardware
+Connect the manipulator to the computer using a wire cable. And change the network setting:
+| Name | Value |
+| ----------- | ----------- |
+| Address | 192.168.1.120 |
+| Netmask | 255.255.255.0 |
+| Gateway | 192.168.1.1 |
+
+Note that the address can be 192.168.1.xxx
+
+## Dependencies
+```
+ament_cmake
+rclcpp
+sensor_msgs
+joint_state_publisher_gui
+robot_state_publisher
+rviz2
+hardware_interface
+pluginlib
+forward_command_controller
+joint_state_broadcaster
+joint_trajectory_controller
+xacro
+```
+Most of them are installed when ROS2 Foxy Desktop is installed. For ros2_control framework, you have to install ros-foxy-ros2-control and ros-foxy-ros2-controllers packages. Other dependencies are installed automatically.

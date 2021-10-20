@@ -50,8 +50,11 @@ To run this package, type the line below in a terminal.
 ```
 ros2 launch venus_description view_manipulator.launch.py
 ```
-After that, the user should be able to see an RViz GUI with this manipulator in it and a joint state publisher GUI. It is posible to change the joint angle using slider in the joint state publisher GUI.
+After that, the user should be able to see an RViz GUI with this manipulator in it.
+and a joint state publisher GUI. It is posible to change the joint angle using slider in the joint state publisher GUI.
 ![](images/description_jsp_gui.png)
+The joint state publisher GUI on bottom-left allows the user to change the joint angle using the slider.
+![](images/view_manipulator.gif)
 
 (Optional)
 Run the following command to enable simultaneous moving both psysically and virtually:

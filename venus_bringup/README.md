@@ -56,7 +56,8 @@ joint_state_broadcaster[joint_state_broadcaster/JointStateBroadcaster] active
 ```
 ros2 launch venus_bringup test_joint_trajectory_controller.launch.py
 ```
-The the user should be see the manipulator start to move back and forth periodically. 
+The the user should be see the manipulator start to move back and forth periodically.
+![](images/control.gif)
 ### Moveit-based
 1. To load the controller, run:
 ```
@@ -74,3 +75,21 @@ The user should see the following GUI appear:
 ![](images/Moveit.png)
 
 4. The user can drag the end-effector of the manipulator to the desired position. Click "Plan" on the bottom-left  Moveit panel to perform motion planning, and click "Execute" to execute the actions. Note that due to IK issues, the end-effector may not be able to move. Please click "Approx IK solutions" to make it movable.
+![](images/moveit.gif)
+
+## Notes
+Such warning sometimes occurs when lanuching bringup files
+```
+[rviz2-3] Warning: Invalid frame ID "link1" passed to canTransform argument source_frame - frame does not exist
+[rviz2-3]          at line 133 in /tmp/binarydeb/ros-foxy-tf2-0.13.10/src/buffer_core.cpp
+```
+and the model in RViz is not displayed correctly.
+
+This is because the joint state broadcaster has not launched when RViz launchs. In fact, sometimes the joint state broadcaster launches with a bit delay. That's why links of the robot are not transformed correctly. What you need to is to wait for a few seconds (at most one minute), it should be fine. After a while the model will be shown correctly. You can also check if the joint state broadcaster is loaded by
+```
+ros2 control list_controllers
+```
+If it is loaded, you should be able to find the following in the list:
+```
+joint_state_broadcaster[joint_state_broadcaster/JointStateBroadcaster] active   
+```
