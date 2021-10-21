@@ -30,16 +30,29 @@ This repository contains ROS packages meant to be used with Venus Manipulator. P
 Clone this repository:
 ```
 mkdir -p ~/arm_ws/src
-cd ~/dev_ws/src
-git clone xxxx
+cd ~/arm_ws/src
+git clone https://gitlab.com/n1094/ros2_venus.git
 ```
 Download actuator's SDK:
 ```
 git clone https://github.com/innfos/innfos-cpp-sdk.git
 ```
-then manually copy innfos-cpp-sdk/sdk to venus_description/ActuatorController_SDK.
+then manually copy innfos-cpp-sdk/sdk to venus_description/ActuatorController_SDK (assume you download it to your home directory):
+```
+mkdir -p ~/arm_ws/src/ros2_venus/venus_description/ActuatorController_SDK
+mkdir -p ~/arm_ws/src/ros2_venus/venus_hardware/ActuatorController_SDK
+cp -r innfos-cpp-sdk/sdk ~/arm_ws/src/ros2_venus/venus_description/ActuatorController_SDK/sdk
+cp -r innfos-cpp-sdk/sdk ~/arm_ws/src/ros2_venus/venus_hardware/ActuatorController_SDK/sdk
+rm -r innfos-cpp-sdk/
+```
 
 Note that the actuator SDK is necessary to make the physical manipulator move.
+
+Then compile the packages:
+```
+cd ~/arm_ws
+colcon build --symlink-install
+```
 ### Hardware
 Connect the manipulator to the computer using a wire cable. And change the network setting:
 | Name | Value |
