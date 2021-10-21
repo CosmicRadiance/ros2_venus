@@ -54,7 +54,7 @@ cd ~/arm_ws
 colcon build --symlink-install
 ```
 ### Hardware
-Connect the manipulator to the computer using a wire cable. And change the network setting:
+Connect the manipulator to the computer using an ethernet cable. And change the network setting:
 | Name | Value |
 | ----------- | ----------- |
 | Address | 192.168.1.120 |
@@ -62,6 +62,8 @@ Connect the manipulator to the computer using a wire cable. And change the netwo
 | Gateway | 192.168.1.1 |
 
 Note that the address can be 192.168.1.xxx
+
+For PC im1050, after connecting the manipulaor and the computer with a cable, switch the network option on top-right of the screen from `Profile 1" to "MINTASCA".
 
 ## Dependencies
 ```
