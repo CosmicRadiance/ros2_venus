@@ -64,6 +64,7 @@ Connect the manipulator to the computer using an ethernet cable. And change the 
 Note that the address can be 192.168.1.xxx
 
 For PC im1050, after connecting the manipulaor and the computer with a cable, switch the network option on top-right of the screen from `Profile 1" to "MINTASCA".
+![](images/network.png)
 
 ## Dependencies
 ```
