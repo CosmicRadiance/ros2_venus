@@ -1,0 +1,122 @@
+#!/bin/bash -u
+
+# This script is used to run a docker container with graphics support.
+# All arguments to this script except "-c <container_name>" will be appended to a docker run command.
+# If a container name is specified, and this container already exists, the container is re-entered,
+# which easily allows entering the same persistent container from multiple terminals.
+
+# Example commands:
+# ./docker_gui --rm -it comac:dev /bin/bash     # Run a (randomly named) container that is removed on exit
+# ./docker_gui -v ~/ros_ws:/root/ros_ws --rm -it comac:dev /bin/bash   # Same, but also link host volume ~/ros_ws to /root/ros_ws in the container
+# ./docker_gui -c container_name                                  # Start (or continue) an interactive bash in a comac:dev container
+# ./docker_gui                                                    # Same, but use the default container name "default_comac_container"
+
+
+GPU_TYPE="Nvidia"  # Nvidia/Intel
+DEFAULT_CONTAINER_NAME="default_venus_container"
+DUMMY_DEFAULTS="-it ros2:venus"
+SOURCE_DIR=$(cd $(dirname "${BASH_SOURCE[0]}")/.. && pwd)
+
+if [[ "$GPU_TYPE" == 'Intel' ]] ; then
+    GPU_PARAMS="--device=/dev/dri:/dev/dri"
+    echo $GPU_TYPE
+elif [[ "$GPU_TYPE" == 'Nvidia' ]] ; then
+    GPU_PARAMS="\
+        --gpus all \
+        --env=NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-all} \
+        --env=NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}all"
+    echo $GPU_TYPE
+fi
+
+function transfer_x11_permissions() {
+    # store X11 access rights in temp file to be passed into docker container
+    XAUTH=/tmp/.docker.xauth
+    touch $XAUTH
+    xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f $XAUTH nmerge -
+}
+
+function count_positional_args() {
+    while true ; do
+       case "${1:-}" in
+          # Skip common options with a subsequent positional argument
+          # This list is not exhaustive! Augment as you see fit.
+          -v|--volume) shift ;;
+          -w) shift ;;
+          -e) shift ;;
+          # Skip all other options
+          -*) ;;
+          *) break ;;
+       esac
+       shift
+    done
+    # Return remaining number of arguments
+    echo $#
+}
+
+CONTAINER_NAME=$DEFAULT_CONTAINER_NAME
+if [ $# -eq 0 ] ; then
+   # If no options are specified at all, use the name "default_comac_container"
+   CONTAINER_NAME=$DEFAULT_CONTAINER_NAME
+   # echo $CONTAINER_NAME
+else
+  # Check for option -c or --container in first position
+  case "$1" in
+    -c|--container)
+      shift
+      # If next argument is not an option, use it as the container name
+      if [[ "${1:-}" != -* ]] ; then
+         CONTAINER_NAME="${1:-}"
+         shift
+      fi
+      # Set default container name if still undefined
+      # CONTAINER_NAME=$DEFAULT_CONTAINER_NAME
+      # echo $CONTAINER_NAME
+      ;;
+  esac
+fi
+
+transfer_x11_permissions
+
+DOCKER_EXECUTABLE=${DOCKER_EXECUTABLE:-docker}
+# echo $DOCKER_EXECUTABLE
+
+# If CONTAINER_NAME was specified and this container already exists, continue it
+if [ -n "${CONTAINER_NAME:-}" ] ; then
+   if [ -z "$($DOCKER_EXECUTABLE ps -aq --filter name=^$CONTAINER_NAME\$)" ] ; then
+      # container not yet existing: add an option to name the container when running docker below
+      NAME_OPTION="--name=$CONTAINER_NAME"
+      if [ "$(count_positional_args $@)" == "0" ] ; then
+         # If no further (positional) arguments were provided, start a bash in the default image (for dummy users)
+         DUMMY=$DUMMY_DEFAULTS
+      fi
+   else
+      if [ -z "$($DOCKER_EXECUTABLE ps -q --filter name=^$CONTAINER_NAME\$)" ] ; then
+         echo -n "Start existing, but stopped container: "
+         docker start $CONTAINER_NAME
+      fi
+      echo "Entering container: $CONTAINER_NAME"
+      if [ $# -eq 0 ] ; then
+         docker exec -it $CONTAINER_NAME bash
+      else
+         docker exec $CONTAINER_NAME $@
+      fi
+      rm $XAUTH
+      exit 0
+   fi
+fi
+
+#xhost +local:docker
+
+${DOCKER_EXECUTABLE:-docker} run \
+    --env="DISPLAY=$DISPLAY" \
+    --env="QT_X11_NO_MITSHM=1" \
+    --env="XAUTHORITY=$XAUTH" \
+    --net=host \
+    --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+    --volume="$XAUTH:$XAUTH" \
+    ${NAME_OPTION:-} \
+    ${GPU_PARAMS:-} \
+    $@ ${DUMMY:-}
+
+# cleanup
+rm $XAUTH
