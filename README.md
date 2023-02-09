@@ -11,6 +11,10 @@ This repository contains ROS packages meant to be used with Venus Manipulator. P
 - venus_moveit_config - contains the configuration files necessary to launch an arm using MoveIt either on the physical robot, or just in Rviz
 - venus_test_nodes - contains test files, can be viewed as examples or demos
 
+## Demo videos
+- Executate by sending trajectory: https://drive.google.com/file/d/1ALz51-gsCdaoZM206adHUW2WDc1ZeSjb/view?usp=sharing
+- Planning using MoveIt: https://drive.google.com/file/d/1uG_PNVStyemBIpw1yVlzWQYom0R6Qq6O/view?usp=share_link
+
 ## Structure
 ```
 .
